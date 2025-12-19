@@ -27,9 +27,6 @@ public class FurnaceCoreBlockEntity extends BlockEntity {
     // ✅ 임시 슬롯 2칸 (연료/광물)
     private ItemStack fuelStack = ItemStack.EMPTY;
     private ItemStack oreStack  = ItemStack.EMPTY;
-    private boolean hadFuelLastTick = false;
-    private long lastFuelBurnGameTime = -1;
-
 
     // ValueIO 키
     private static final String K_SESSION = "Session";
@@ -57,35 +54,6 @@ public class FurnaceCoreBlockEntity extends BlockEntity {
         ItemStack fuel = be.getStackInSlot(ModFurnaceSlots.SLOT_FUEL);
         ItemStack ore  = be.getStackInSlot(ModFurnaceSlots.SLOT_ORE);
 
-        // ✅ 연료 소모: "가열 시작 순간 1개" + 이후 1600틱마다 1개
-        boolean hasFuelNow = !fuel.isEmpty();
-
-        if (hasFuelNow && !be.hadFuelLastTick) {
-            // (A) 연료가 없던 상태 -> 연료가 생김: 즉시 1개 태움
-            fuel.shrink(1);
-            if (fuel.isEmpty()) be.setStackInSlot(ModFurnaceSlots.SLOT_FUEL, ItemStack.EMPTY);
-            else be.setStackInSlot(ModFurnaceSlots.SLOT_FUEL, fuel);
-
-            be.lastFuelBurnGameTime = level.getGameTime();
-        } else if (hasFuelNow) {
-            // (B) 이미 타고 있는 상태: 1600틱마다 1개
-            if (be.lastFuelBurnGameTime < 0) be.lastFuelBurnGameTime = level.getGameTime();
-
-            if (level.getGameTime() - be.lastFuelBurnGameTime >= 1600) {
-                fuel.shrink(1);
-                if (fuel.isEmpty()) be.setStackInSlot(ModFurnaceSlots.SLOT_FUEL, ItemStack.EMPTY);
-                else be.setStackInSlot(ModFurnaceSlots.SLOT_FUEL, fuel);
-
-                be.lastFuelBurnGameTime = level.getGameTime();
-            }
-        }
-
-        be.hadFuelLastTick = hasFuelNow;
-
-        // ✅ 중요: 연료를 깎았을 수 있으니, fuel 변수를 최신으로 다시 읽는다
-        fuel = be.getStackInSlot(ModFurnaceSlots.SLOT_FUEL);
-
-        // ✅ 세션에 fuel/ore 반영
         be.session.setFuelId(fuel.isEmpty() ? null : BuiltInRegistries.ITEM.getKey(fuel.getItem()).toString());
         be.session.setOreId(ore.isEmpty()  ? null : BuiltInRegistries.ITEM.getKey(ore.getItem()).toString());
 
@@ -112,6 +80,13 @@ public class FurnaceCoreBlockEntity extends BlockEntity {
 
         be.session.setTemperature(next);
 
+        // ✅ 연료 소모(임시): 5초(100tick)마다 1개씩
+        if (!fuel.isEmpty() && level.getGameTime() % 1600 == 0) {
+            fuel.shrink(1);
+            if (fuel.isEmpty()) be.setStackInSlot(ModFurnaceSlots.SLOT_FUEL, ItemStack.EMPTY);
+            else be.setStackInSlot(ModFurnaceSlots.SLOT_FUEL, fuel);
+        }
+
         FurnaceLogic.tick(be.session);
 
         // ✅ 로그는 1초마다만
@@ -123,7 +98,6 @@ public class FurnaceCoreBlockEntity extends BlockEntity {
             be.setChanged();
         }
     }
-
 
 
 

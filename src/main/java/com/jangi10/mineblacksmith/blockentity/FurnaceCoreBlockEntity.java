@@ -3,8 +3,10 @@ package com.jangi10.mineblacksmith.blockentity;
 import com.jangi10.mineblacksmith.ModBlockEntities;
 import com.jangi10.mineblacksmith.core.data.FurnaceSession;
 import com.jangi10.mineblacksmith.core.data.IngotMoldState;
+import com.jangi10.mineblacksmith.core.init.ModFuels;
 import com.jangi10.mineblacksmith.core.init.ModFurnaceSlots;
 import com.jangi10.mineblacksmith.core.logic.FurnaceLogic;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -31,9 +33,11 @@ public class FurnaceCoreBlockEntity extends BlockEntity {
     private static final String K_SESSION = "Session";
     private static final String K_ITEMS   = "Items";
 
-    private static final String S_ORE_ID  = "OreId";
-    private static final String S_FUEL_ID = "FuelId";
-    private static final String S_TEMP    = "Temperature";
+    private static final String S_ORE_ID      = "OreId";
+    private static final String S_FUEL_ID     = "FuelId";
+    private static final String S_TEMP        = "Temperature";
+    private static final String S_BURN_TICKS  = "BurnTicks";
+    private static final String S_BURN_TOTAL  = "BurnTicksTotal";
 
     private static final String I_FUEL_ID    = "FuelItemId";
     private static final String I_FUEL_COUNT = "FuelCount";
@@ -53,55 +57,91 @@ public class FurnaceCoreBlockEntity extends BlockEntity {
         ItemStack fuel = be.getStackInSlot(ModFurnaceSlots.SLOT_FUEL);
         ItemStack ore  = be.getStackInSlot(ModFurnaceSlots.SLOT_ORE);
 
-        be.session.setFuelId(fuel.isEmpty() ? null : BuiltInRegistries.ITEM.getKey(fuel.getItem()).toString());
-        be.session.setOreId(ore.isEmpty()  ? null : BuiltInRegistries.ITEM.getKey(ore.getItem()).toString());
+        // oreId는 그냥 슬롯 반영(언제나 OK)
+        be.session.setOreId(ore.isEmpty() ? null : BuiltInRegistries.ITEM.getKey(ore.getItem()).toString());
 
-        // ✅ 온도 갱신(가열/냉각)
+        // ==========================================
+        // ✅ 바닐라 화로 방식 "연소 상태 머신"
+        // - burnTicks > 0 : 불 켜짐(연료 추가 투입해도 소모 없음)
+        // - burnTicks == 0 : 그 순간에만 연료 1개 소모(-1) + burnTicksTotal 세팅
+        // ==========================================
+        int burn = be.session.getBurnTicks();
+        int burnTotal = be.session.getBurnTicksTotal();
+
+        // 1) 불이 켜져 있으면 burnTicks 감소
+        if (burn > 0) {
+            burn--;
+            be.session.setBurnTicks(burn);
+        }
+
+        // 2) 불이 꺼진 상태(burn==0)라면, 연료가 있을 때 "점화" (여기서만 -1)
+        if (burn == 0) {
+            // 다음 점화를 위한 fuelId는 슬롯 기준으로 갱신
+            String slotFuelId = fuel.isEmpty() ? null : BuiltInRegistries.ITEM.getKey(fuel.getItem()).toString();
+            be.session.setFuelId(slotFuelId);
+
+            if (!fuel.isEmpty() && slotFuelId != null) {
+                int nextBurnTotal = ModFuels.getBurnTicksForItemId(slotFuelId); // 예: 석탄 1600
+                if (nextBurnTotal > 0) {
+                    // ✅ 점화 순간에만 연료 1개 소모
+                    fuel.shrink(1);
+                    be.setStackInSlot(ModFurnaceSlots.SLOT_FUEL, fuel.isEmpty() ? ItemStack.EMPTY : fuel);
+
+                    be.session.setBurnTicksTotal(nextBurnTotal);
+                    be.session.setBurnTicks(nextBurnTotal);
+
+                    burn = nextBurnTotal;
+                    burnTotal = nextBurnTotal;
+                    // fuelId는 "이번에 태우는 연료"로 확정된 값(=slotFuelId)
+                    be.session.setFuelId(slotFuelId);
+                }
+            }
+        } else {
+            // 불이 켜져 있는 동안에는 fuelId를 "현재 연소 중인 연료"로 유지
+            // (슬롯에 추가로 넣어도 연소 연료가 바뀌지 않게)
+            if (be.session.getFuelId() == null && !fuel.isEmpty()) {
+                be.session.setFuelId(BuiltInRegistries.ITEM.getKey(fuel.getItem()).toString());
+            }
+        }
+
+        boolean isBurning = be.session.getBurnTicks() > 0;
+
+        // ==========================================
+        // ✅ 온도 시스템(우리 것) — 연소 상태에 따라 가열/냉각
+        // ==========================================
         double cur = be.session.getTemperature();
         double next = cur;
 
-        // fuelId -> FuelData 매칭(임시: ModFuels 상수들만)
         com.jangi10.mineblacksmith.core.data.FuelData fd = null;
-        String fuelId = be.session.getFuelId();
-        if (fuelId != null) {
-            if (fuelId.equals(com.jangi10.mineblacksmith.core.init.ModFuels.WOOD.getTargetItemId())) fd = com.jangi10.mineblacksmith.core.init.ModFuels.WOOD;
-            else if (fuelId.equals(com.jangi10.mineblacksmith.core.init.ModFuels.CHARCOAL.getTargetItemId())) fd = com.jangi10.mineblacksmith.core.init.ModFuels.CHARCOAL;
-            else if (fuelId.equals(com.jangi10.mineblacksmith.core.init.ModFuels.COAL.getTargetItemId())) fd = com.jangi10.mineblacksmith.core.init.ModFuels.COAL;
-            else if (fuelId.equals(com.jangi10.mineblacksmith.core.init.ModFuels.COKE.getTargetItemId())) fd = com.jangi10.mineblacksmith.core.init.ModFuels.COKE;
+        String burningFuelId = be.session.getFuelId();
+
+        if (burningFuelId != null) {
+            if (burningFuelId.equals(ModFuels.WOOD.getTargetItemId())) fd = ModFuels.WOOD;
+            else if (burningFuelId.equals(ModFuels.CHARCOAL.getTargetItemId())) fd = ModFuels.CHARCOAL;
+            else if (burningFuelId.equals(ModFuels.COAL.getTargetItemId())) fd = ModFuels.COAL;
+            else if (burningFuelId.equals(ModFuels.COKE.getTargetItemId())) fd = ModFuels.COKE;
         }
 
-        if (fd != null) {
+        if (isBurning && fd != null) {
             next = com.jangi10.mineblacksmith.core.logic.HeatPhysics.calculateNextTemperature(cur, fd, false);
         } else {
-            // 연료 없으면 서서히 20도로 복귀(임시)
+            // 불 꺼짐(또는 연료데이터 없음) => 냉각
             next = Math.max(20.0, cur - 1.0);
         }
 
         be.session.setTemperature(next);
 
-        // ✅ 연료 소모(임시): 5초(100tick)마다 1개씩
-        if (!fuel.isEmpty() && level.getGameTime() % 1600 == 0) {
-            fuel.shrink(1);
-            if (fuel.isEmpty()) be.setStackInSlot(ModFurnaceSlots.SLOT_FUEL, ItemStack.EMPTY);
-            else be.setStackInSlot(ModFurnaceSlots.SLOT_FUEL, fuel);
-        }
-
+        // 코어 로직 틱
         FurnaceLogic.tick(be.session);
 
-        // ✅ 로그는 1초마다만
+        // 1초마다만 dirty
         if (level.getGameTime() % 20 == 0) {
-            System.out.println("[MineBlacksmith] FurnaceCore tickServer at " + pos
-                    + " temp=" + be.session.getTemperature()
-                    + " fuel=" + be.session.getFuelId()
-                    + " ore=" + be.session.getOreId());
             be.setChanged();
         }
     }
 
-
-
     // =========================
-    // 슬롯 접근 (블록 우클릭 테스트용)
+    // 슬롯 접근 (임시)
     // =========================
     public ItemStack getStackInSlot(int slot) {
         if (slot == ModFurnaceSlots.SLOT_FUEL) return fuelStack.copy();
@@ -119,26 +159,26 @@ public class FurnaceCoreBlockEntity extends BlockEntity {
         setChanged();
     }
 
-
-
     public FurnaceSession getSession() {
         return session;
     }
 
     // =========================
-    // ✅ NeoForge 1.21.10 저장/로드 시그니처 (ValueIO)
+    // ✅ NeoForge 1.21.10 저장/로드 (ValueIO)
     // =========================
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
 
-        // Session(객체 child)
         ValueOutput s = output.child(K_SESSION);
+
         if (session.getOreId() != null)  s.putString(S_ORE_ID, session.getOreId());
         if (session.getFuelId() != null) s.putString(S_FUEL_ID, session.getFuelId());
-        s.putDouble(S_TEMP, session.getTemperature());
 
-        // Items(객체 child)
+        s.putDouble(S_TEMP, session.getTemperature());
+        s.putInt(S_BURN_TICKS, session.getBurnTicks());
+        s.putInt(S_BURN_TOTAL, session.getBurnTicksTotal());
+
         ValueOutput it = output.child(K_ITEMS);
         writeOneStack(it, I_FUEL_ID, I_FUEL_COUNT, fuelStack);
         writeOneStack(it, I_ORE_ID,  I_ORE_COUNT,  oreStack);
@@ -148,17 +188,22 @@ public class FurnaceCoreBlockEntity extends BlockEntity {
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
 
-        // Session
         ValueInput s = input.childOrEmpty(K_SESSION);
+
         String oreId  = s.getStringOr(S_ORE_ID, "");
         String fuelId = s.getStringOr(S_FUEL_ID, "");
         double temp   = s.getDoubleOr(S_TEMP, 20.0);
+
+        int burnTicks = s.getIntOr(S_BURN_TICKS, 0);
+        int burnTotal = s.getIntOr(S_BURN_TOTAL, 0);
 
         session.setOreId(oreId.isBlank() ? null : oreId);
         session.setFuelId(fuelId.isBlank() ? null : fuelId);
         session.setTemperature(temp);
 
-        // Items
+        session.setBurnTicks(burnTicks);
+        session.setBurnTicksTotal(burnTotal);
+
         ValueInput it = input.childOrEmpty(K_ITEMS);
         fuelStack = readOneStack(it, I_FUEL_ID, I_FUEL_COUNT);
         oreStack  = readOneStack(it, I_ORE_ID,  I_ORE_COUNT);
@@ -178,13 +223,11 @@ public class FurnaceCoreBlockEntity extends BlockEntity {
     private static ItemStack readOneStack(ValueInput in, String keyId, String keyCount) {
         String idStr = in.getStringOr(keyId, "");
         int count = in.getIntOr(keyCount, 0);
-
         if (idStr.isBlank() || count <= 0) return ItemStack.EMPTY;
 
         ResourceLocation id = ResourceLocation.tryParse(idStr);
         if (id == null) return ItemStack.EMPTY;
 
-        // ✅ 반환 타입이 환경마다 갈려도 통과시키는 “안전 캐스팅”
         Optional<?> opt = BuiltInRegistries.ITEM.getOptional(id);
         if (opt.isEmpty()) return ItemStack.EMPTY;
 
@@ -205,5 +248,4 @@ public class FurnaceCoreBlockEntity extends BlockEntity {
 
         return ItemStack.EMPTY;
     }
-
 }

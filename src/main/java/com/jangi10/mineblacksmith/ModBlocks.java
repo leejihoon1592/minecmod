@@ -16,7 +16,9 @@ public class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS =
             DeferredRegister.createBlocks(MineBlacksmith.MODID);
 
-    // ✅ NeoForge 1.21.x 필수: Block id 지정
+    // =========================
+    // furnace_core
+    // =========================
     private static final ResourceKey<Block> FURNACE_CORE_KEY =
             ResourceKey.create(
                     Registries.BLOCK,
@@ -31,6 +33,26 @@ public class ModBlocks {
                                     .mapColor(MapColor.METAL)
                                     .strength(3.0f)
                                     .setId(FURNACE_CORE_KEY)
+                    )
+            );
+
+    // =========================
+    // coke_block
+    // =========================
+    private static final ResourceKey<Block> COKE_BLOCK_KEY =
+            ResourceKey.create(
+                    Registries.BLOCK,
+                    ResourceLocation.fromNamespaceAndPath(MineBlacksmith.MODID, "coke_block")
+            );
+
+    public static final DeferredHolder<Block, Block> COKE_BLOCK =
+            BLOCKS.register(
+                    "coke_block",
+                    () -> new Block(
+                            BlockBehaviour.Properties.of()
+                                    .mapColor(MapColor.COLOR_BLACK)
+                                    .strength(4.0f)
+                                    .setId(COKE_BLOCK_KEY)
                     )
             );
 

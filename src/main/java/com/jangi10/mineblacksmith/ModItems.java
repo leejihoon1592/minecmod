@@ -14,7 +14,9 @@ public class ModItems {
     public static final DeferredRegister.Items ITEMS =
             DeferredRegister.createItems(MineBlacksmith.MODID);
 
-    // ✅ NeoForge 1.21.x 필수: Item id 지정
+    // =========================
+    // furnace_core (BlockItem)
+    // =========================
     private static final ResourceKey<Item> FURNACE_CORE_ITEM_KEY =
             ResourceKey.create(
                     Registries.ITEM,
@@ -27,6 +29,39 @@ public class ModItems {
                     () -> new BlockItem(
                             ModBlocks.FURNACE_CORE.get(),
                             new Item.Properties().setId(FURNACE_CORE_ITEM_KEY)
+                    )
+            );
+
+    // =========================
+    // coke (Item)
+    // =========================
+    private static final ResourceKey<Item> COKE_ITEM_KEY =
+            ResourceKey.create(
+                    Registries.ITEM,
+                    ResourceLocation.fromNamespaceAndPath(MineBlacksmith.MODID, "coke")
+            );
+
+    public static final DeferredHolder<Item, Item> COKE =
+            ITEMS.register(
+                    "coke",
+                    () -> new Item(new Item.Properties().setId(COKE_ITEM_KEY))
+            );
+
+    // =========================
+    // coke_block (BlockItem)
+    // =========================
+    private static final ResourceKey<Item> COKE_BLOCK_ITEM_KEY =
+            ResourceKey.create(
+                    Registries.ITEM,
+                    ResourceLocation.fromNamespaceAndPath(MineBlacksmith.MODID, "coke_block")
+            );
+
+    public static final DeferredHolder<Item, BlockItem> COKE_BLOCK_ITEM =
+            ITEMS.register(
+                    "coke_block",
+                    () -> new BlockItem(
+                            ModBlocks.COKE_BLOCK.get(),
+                            new Item.Properties().setId(COKE_BLOCK_ITEM_KEY)
                     )
             );
 

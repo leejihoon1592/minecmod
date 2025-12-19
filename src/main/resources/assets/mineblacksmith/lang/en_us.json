@@ -1,3 +1,11 @@
 {
-  "itemGroup.mineblacksmith.mineblacksmith": "MineBlacksmith"
+  "itemGroup.mineblacksmith.mineblacksmith": "MineBlacksmith",
+
+
+  "item.mineblacksmith.coke": "Coke",
+  "item.mineblacksmith.coke_block": "Coke Block",
+
+  "block.mineblacksmith.coke_block": "Coke Block"
+
+
 }

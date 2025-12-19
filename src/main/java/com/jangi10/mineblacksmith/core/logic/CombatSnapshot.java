@@ -1,4 +1,4 @@
-package com.jangi10.mineblacksmith.core.logic;
+package com.jangi10.mineblacksmith.core.data;
 
 /**
  * [전투 스냅샷]

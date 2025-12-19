@@ -1,4 +1,4 @@
-package com.jangi10.mineblacksmith.core.logic;
+package com.jangi10.mineblacksmith.core.data;
 
 /**
  * [원거리 전투 결과]

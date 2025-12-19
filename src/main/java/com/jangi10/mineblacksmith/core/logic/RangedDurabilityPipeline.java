@@ -1,7 +1,7 @@
 package com.jangi10.mineblacksmith.core.logic;
 
-import com.jangi10.mineblacksmith.core.data.RangedCombatResult;
 import com.jangi10.mineblacksmith.core.data.ForgingStats;
+import com.jangi10.mineblacksmith.core.data.RangedCombatResult;
 
 /**
  * [원거리 내구 파이프라인]

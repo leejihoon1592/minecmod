@@ -2,13 +2,8 @@ package com.jangi10.mineblacksmith.core.logic;
 
 import com.jangi10.mineblacksmith.core.data.*;
 import com.jangi10.mineblacksmith.core.registry.FuelRegistry;
-import com.jangi10.mineblacksmith.core.registry.OreRegistry;
-import com.jangi10.mineblacksmith.core.logic.TemperatureColor;
-import com.jangi10.mineblacksmith.core.logic.ForgeAvailability;
-import com.jangi10.mineblacksmith.core.data.IngotData;
 import com.jangi10.mineblacksmith.core.registry.MaterialRegistry;
-
-
+import com.jangi10.mineblacksmith.core.registry.OreRegistry;
 
 import java.util.Random;
 

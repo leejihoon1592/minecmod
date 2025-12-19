@@ -5,7 +5,6 @@ import com.jangi10.mineblacksmith.core.data.FurnaceSession;
 import com.jangi10.mineblacksmith.core.data.IngotMoldState;
 import com.jangi10.mineblacksmith.core.init.ModFurnaceSlots;
 import com.jangi10.mineblacksmith.core.logic.FurnaceLogic;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;

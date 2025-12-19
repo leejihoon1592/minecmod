@@ -3,9 +3,7 @@ package com.jangi10.mineblacksmith.block;
 import com.jangi10.mineblacksmith.ModBlockEntities;
 import com.jangi10.mineblacksmith.blockentity.FurnaceCoreBlockEntity;
 import com.jangi10.mineblacksmith.core.init.ModFurnaceSlots;
-
 import com.mojang.serialization.MapCodec;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -19,7 +17,6 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-
 import org.jetbrains.annotations.Nullable;
 
 public class FurnaceCoreBlock extends BaseEntityBlock {

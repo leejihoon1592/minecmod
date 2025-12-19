@@ -1,0 +1,92 @@
+[1mdiff --git a/src/main/java/com/jangi10/mineblacksmith/blockentity/FurnaceCoreBlockEntity.java b/src/main/java/com/jangi10/mineblacksmith/blockentity/FurnaceCoreBlockEntity.java[m
+[1mindex 131945e..cad88f2 100644[m
+[1m--- a/src/main/java/com/jangi10/mineblacksmith/blockentity/FurnaceCoreBlockEntity.java[m
+[1m+++ b/src/main/java/com/jangi10/mineblacksmith/blockentity/FurnaceCoreBlockEntity.java[m
+[36m@@ -27,9 +27,6 @@[m [mpublic class FurnaceCoreBlockEntity extends BlockEntity {[m
+     // ✅ 임시 슬롯 2칸 (연료/광물)[m
+     private ItemStack fuelStack = ItemStack.EMPTY;[m
+     private ItemStack oreStack  = ItemStack.EMPTY;[m
+[31m-    private boolean hadFuelLastTick = false;[m
+[31m-    private long lastFuelBurnGameTime = -1;[m
+[31m-[m
+ [m
+     // ValueIO 키[m
+     private static final String K_SESSION = "Session";[m
+[36m@@ -57,35 +54,6 @@[m [mpublic class FurnaceCoreBlockEntity extends BlockEntity {[m
+         ItemStack fuel = be.getStackInSlot(ModFurnaceSlots.SLOT_FUEL);[m
+         ItemStack ore  = be.getStackInSlot(ModFurnaceSlots.SLOT_ORE);[m
+ [m
+[31m-        // ✅ 연료 소모: "가열 시작 순간 1개" + 이후 1600틱마다 1개[m
+[31m-        boolean hasFuelNow = !fuel.isEmpty();[m
+[31m-[m
+[31m-        if (hasFuelNow && !be.hadFuelLastTick) {[m
+[31m-            // (A) 연료가 없던 상태 -> 연료가 생김: 즉시 1개 태움[m
+[31m-            fuel.shrink(1);[m
+[31m-            if (fuel.isEmpty()) be.setStackInSlot(ModFurnaceSlots.SLOT_FUEL, ItemStack.EMPTY);[m
+[31m-            else be.setStackInSlot(ModFurnaceSlots.SLOT_FUEL, fuel);[m
+[31m-[m
+[31m-            be.lastFuelBurnGameTime = level.getGameTime();[m
+[31m-        } else if (hasFuelNow) {[m
+[31m-            // (B) 이미 타고 있는 상태: 1600틱마다 1개[m
+[31m-            if (be.lastFuelBurnGameTime < 0) be.lastFuelBurnGameTime = level.getGameTime();[m
+[31m-[m
+[31m-            if (level.getGameTime() - be.lastFuelBurnGameTime >= 1600) {[m
+[31m-                fuel.shrink(1);[m
+[31m-                if (fuel.isEmpty()) be.setStackInSlot(ModFurnaceSlots.SLOT_FUEL, ItemStack.EMPTY);[m
+[31m-                else be.setStackInSlot(ModFurnaceSlots.SLOT_FUEL, fuel);[m
+[31m-[m
+[31m-                be.lastFuelBurnGameTime = level.getGameTime();[m
+[31m-            }[m
+[31m-        }[m
+[31m-[m
+[31m-        be.hadFuelLastTick = hasFuelNow;[m
+[31m-[m
+[31m-        // ✅ 중요: 연료를 깎았을 수 있으니, fuel 변수를 최신으로 다시 읽는다[m
+[31m-        fuel = be.getStackInSlot(ModFurnaceSlots.SLOT_FUEL);[m
+[31m-[m
+[31m-        // ✅ 세션에 fuel/ore 반영[m
+         be.session.setFuelId(fuel.isEmpty() ? null : BuiltInRegistries.ITEM.getKey(fuel.getItem()).toString());[m
+         be.session.setOreId(ore.isEmpty()  ? null : BuiltInRegistries.ITEM.getKey(ore.getItem()).toString());[m
+ [m
+[36m@@ -112,6 +80,13 @@[m [mpublic class FurnaceCoreBlockEntity extends BlockEntity {[m
+ [m
+         be.session.setTemperature(next);[m
+ [m
+[32m+[m[32m        // ✅ 연료 소모(임시): 5초(100tick)마다 1개씩[m
+[32m+[m[32m        if (!fuel.isEmpty() && level.getGameTime() % 1600 == 0) {[m
+[32m+[m[32m            fuel.shrink(1);[m
+[32m+[m[32m            if (fuel.isEmpty()) be.setStackInSlot(ModFurnaceSlots.SLOT_FUEL, ItemStack.EMPTY);[m
+[32m+[m[32m            else be.setStackInSlot(ModFurnaceSlots.SLOT_FUEL, fuel);[m
+[32m+[m[32m        }[m
+[32m+[m
+         FurnaceLogic.tick(be.session);[m
+ [m
+         // ✅ 로그는 1초마다만[m
+[36m@@ -126,7 +101,6 @@[m [mpublic class FurnaceCoreBlockEntity extends BlockEntity {[m
+ [m
+ [m
+ [m
+[31m-[m
+     // =========================[m
+     // 슬롯 접근 (블록 우클릭 테스트용)[m
+     // =========================[m
+[1mdiff --git a/src/main/java/com/jangi10/mineblacksmith/core/logic/CombatSnapshot.java b/src/main/java/com/jangi10/mineblacksmith/core/logic/CombatSnapshot.java[m
+[1mindex 29e7836..496e103 100644[m
+[1m--- a/src/main/java/com/jangi10/mineblacksmith/core/logic/CombatSnapshot.java[m
+[1m+++ b/src/main/java/com/jangi10/mineblacksmith/core/logic/CombatSnapshot.java[m
+[36m@@ -1,4 +1,4 @@[m
+[31m-package com.jangi10.mineblacksmith.core.logic;[m
+[32m+[m[32mpackage com.jangi10.mineblacksmith.core.data;[m
+ [m
+ /**[m
+  * [전투 스냅샷][m
+[1mdiff --git a/src/main/java/com/jangi10/mineblacksmith/core/logic/RangedCombatResult.java b/src/main/java/com/jangi10/mineblacksmith/core/logic/RangedCombatResult.java[m
+[1mindex 123bae8..fb8ea06 100644[m
+[1m--- a/src/main/java/com/jangi10/mineblacksmith/core/logic/RangedCombatResult.java[m
+[1m+++ b/src/main/java/com/jangi10/mineblacksmith/core/logic/RangedCombatResult.java[m
+[36m@@ -1,4 +1,4 @@[m
+[31m-package com.jangi10.mineblacksmith.core.logic;[m
+[32m+[m[32mpackage com.jangi10.mineblacksmith.core.data;[m
+ [m
+ /**[m
+  * [원거리 전투 결과][m

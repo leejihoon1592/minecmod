@@ -1,0 +1,15 @@
+{
+  "id": "iron",
+  "name": "철(Iron)",
+  "baseStats": {
+    "durability": 6.0,
+    "hardness": 14.0,
+    "elasticity": 5.0,
+    "polishability": 12.0,
+    "conductivity": 7.0
+  },
+  "meltingPoint": 1538.0,
+  "boilingPoint": 2862.0,
+  "difficultyLevel": 1,
+  "baseColor": 15132390
+}

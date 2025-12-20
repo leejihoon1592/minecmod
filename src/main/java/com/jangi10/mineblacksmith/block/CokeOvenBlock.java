@@ -40,8 +40,8 @@ public class CokeOvenBlock extends AbstractFurnaceBlock {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockState pState, BlockEntityType<T> pBlockEntityType) {
-        // ModBlockEntities.COKE_OVEN_BLOCK_ENTITY 참조 오류 해결됨
-        return createFurnaceTicker(pLevel, pBlockEntityType, ModBlockEntities.COKE_OVEN_BLOCK_ENTITY.get());
+        // [수정됨] 변수명을 COKE_OVEN으로 변경하여 ModBlockEntities와 일치시킴
+        return createFurnaceTicker(pLevel, pBlockEntityType, ModBlockEntities.COKE_OVEN.get());
     }
 
     @Override

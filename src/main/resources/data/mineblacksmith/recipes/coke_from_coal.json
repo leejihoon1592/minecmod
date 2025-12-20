@@ -1,7 +1,13 @@
 {
   "type": "minecraft:smelting",
-  "ingredient": { "item": "minecraft:coal" },
-  "result": { "id": "mineblacksmith:coke" },
-  "experience": 0.0,
-  "cookingtime": 2400
+  "category": "misc",
+  "cookingtime": 2400,
+  "experience": 1.0,
+  "group": "coke",
+  "ingredient": {
+    "item": "minecraft:coal"
+  },
+  "result": {
+    "id": "mineblacksmith:coke"
+  }
 }

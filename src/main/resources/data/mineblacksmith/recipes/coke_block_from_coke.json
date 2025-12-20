@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CCC",
+    "CCC",
+    "CCC"
+  ],
+  "key": {
+    "C": {
+      "item": "mineblacksmith:coke"
+    }
+  },
+  "result": {
+    "item": "mineblacksmith:coke_block"
+  }
+}

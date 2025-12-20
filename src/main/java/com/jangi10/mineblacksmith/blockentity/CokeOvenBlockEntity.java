@@ -13,8 +13,8 @@ import net.minecraft.world.level.block.state.BlockState;
 public class CokeOvenBlockEntity extends AbstractFurnaceBlockEntity {
 
     public CokeOvenBlockEntity(BlockPos pPos, BlockState pBlockState) {
-        // ModBlockEntities가 위에서 정상적으로 컴파일되면, 여기서도 에러가 사라집니다.
-        super(ModBlockEntities.COKE_OVEN_BLOCK_ENTITY.get(), pPos, pBlockState, RecipeType.SMELTING);
+        // [수정 완료] COKE_OVEN_BLOCK_ENTITY -> COKE_OVEN 으로 변경
+        super(ModBlockEntities.COKE_OVEN.get(), pPos, pBlockState, RecipeType.SMELTING);
     }
 
     @Override

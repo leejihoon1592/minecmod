@@ -64,6 +64,25 @@ public class ModItems {
                             new Item.Properties().setId(COKE_BLOCK_ITEM_KEY)
                     )
             );
+    // =========================
+    // COKE_OVEN_ITEM_KEY
+    // =========================
+
+    private static final ResourceKey<Item> COKE_OVEN_ITEM_KEY =
+            ResourceKey.create(
+                    Registries.ITEM,
+                    ResourceLocation.fromNamespaceAndPath(MineBlacksmith.MODID, "coke_oven")
+            );
+    public static final DeferredHolder<Item, BlockItem> COKE_OVEN_ITEM =
+            ITEMS.register(
+                    "coke_oven",
+                    () -> new BlockItem(
+                            ModBlocks.COKE_OVEN.get(),
+                            new Item.Properties().setId(COKE_OVEN_ITEM_KEY)
+                    )
+            );
+
+
 
     private ModItems() {}
 }

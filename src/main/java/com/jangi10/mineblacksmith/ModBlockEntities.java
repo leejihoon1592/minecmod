@@ -19,5 +19,16 @@ public class ModBlockEntities {
                             ModBlocks.FURNACE_CORE.get()
                     ));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<com.jangi10.mineblacksmith.blockentity.CokeOvenBlockEntity>> COKE_OVEN =
+            BLOCK_ENTITY_TYPES.register("coke_oven",
+                    () -> new BlockEntityType<>(
+                            com.jangi10.mineblacksmith.blockentity.CokeOvenBlockEntity::new,
+                            false,
+                            ModBlocks.COKE_OVEN.get()
+                    ));
+
+
+
+
     private ModBlockEntities() {}
 }

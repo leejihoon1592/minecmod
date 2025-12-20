@@ -56,5 +56,28 @@ public class ModBlocks {
                     )
             );
 
+    // =========================
+    // coke_oven
+    // =========================
+    private static final ResourceKey<Block> COKE_OVEN_KEY =
+            ResourceKey.create(
+                    Registries.BLOCK,
+                    ResourceLocation.fromNamespaceAndPath(MineBlacksmith.MODID, "coke_oven")
+            );
+
+    public static final DeferredHolder<Block, Block> COKE_OVEN =
+            BLOCKS.register(
+                    "coke_oven",
+                    () -> new com.jangi10.mineblacksmith.block.CokeOvenBlock(
+                            BlockBehaviour.Properties.of()
+                                    .mapColor(MapColor.STONE)
+                                    .strength(3.5F)
+                                    .requiresCorrectToolForDrops()
+                                    .setId(COKE_OVEN_KEY)
+                    )
+            );
+
+
+
     private ModBlocks() {}
 }

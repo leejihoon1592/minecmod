@@ -1,7 +1,7 @@
 package com.jangi10.mineblacksmith.block;
 
-import com.jangi10.mineblacksmith.blockentity.CokeOvenBlockEntity;
 import com.jangi10.mineblacksmith.ModBlockEntities;
+import com.jangi10.mineblacksmith.blockentity.CokeOvenBlockEntity;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -13,22 +13,33 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
 import org.jetbrains.annotations.Nullable;
 
 public class CokeOvenBlock extends AbstractFurnaceBlock {
+
     public static final MapCodec<CokeOvenBlock> CODEC = simpleCodec(CokeOvenBlock::new);
 
     public CokeOvenBlock(Properties pProperties) {
         super(pProperties);
+        this.registerDefaultState(this.stateDefinition.any()
+                .setValue(FACING, Direction.NORTH)
+                .setValue(LIT, false));
     }
 
     @Override
     protected MapCodec<? extends AbstractFurnaceBlock> codec() {
         return CODEC;
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING, LIT);
     }
 
     @Nullable
@@ -40,7 +51,6 @@ public class CokeOvenBlock extends AbstractFurnaceBlock {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockState pState, BlockEntityType<T> pBlockEntityType) {
-        // [수정됨] 변수명을 COKE_OVEN으로 변경하여 ModBlockEntities와 일치시킴
         return createFurnaceTicker(pLevel, pBlockEntityType, ModBlockEntities.COKE_OVEN.get());
     }
 

@@ -4,8 +4,10 @@
 
   "item.mineblacksmith.coke": "Coke",
   "item.mineblacksmith.coke_block": "Coke Block",
+  "block.mineblacksmith.coke_block": "Coke Block",
+  "block.mineblacksmith.coke_oven": "Coke Oven",
+  "container.mineblacksmith.coke_oven": "Coke Oven"
 
-  "block.mineblacksmith.coke_block": "Coke Block"
 
 
 }

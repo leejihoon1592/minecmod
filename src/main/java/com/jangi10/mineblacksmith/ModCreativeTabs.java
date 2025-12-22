@@ -25,6 +25,9 @@ public class ModCreativeTabs {
                                 output.accept(ModItems.FURNACE_CORE_ITEM.get());
                                 output.accept(ModItems.COKE.get());
                                 output.accept(ModItems.COKE_BLOCK_ITEM.get());
+                                output.accept(ModItems.COKE_OVEN_ITEM.get());
+
+
                                 // 나중에 아이템/블록 늘어나면 여기 계속 추가
 
                             })

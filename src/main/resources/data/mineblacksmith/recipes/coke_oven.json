@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SSS",
+    "SFS",
+    "SSS"
+  ],
+  "key": {
+    "S": { "item": "minecraft:stone" },
+    "F": { "item": "minecraft:furnace" }
+  },
+  "result": {
+    "item": "mineblacksmith:coke_oven",
+    "count": 1
+  }
+}

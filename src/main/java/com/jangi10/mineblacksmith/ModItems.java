@@ -40,7 +40,7 @@ public class ModItems {
     // Function Items
     // ------------------------------------------------------------
 
-    // ✅ 가이드북(연구 도감) - 아직은 아이템만 등록, UI는 이후 연결
+    // ✅ 가이드북(연구 도감)
     public static final DeferredHolder<Item, Item> RESEARCH_CODEX = registerSimple("research_codex");
 
     // ------------------------------------------------------------
@@ -60,32 +60,34 @@ public class ModItems {
             registerBlockItem("coke_oven", ModBlocks.COKE_OVEN);
 
     // ------------------------------------------------------------
+    // Material IDs
+    // ------------------------------------------------------------
+    public static final List<String> METAL_IDS = ModMetalIds.METAL_IDS;
+
+    // ------------------------------------------------------------
     // Material Items (raw / ingot / nugget)
     // ------------------------------------------------------------
-
-    /**
-     * 금속 ID 목록(텍스처/데이터 기준)
-     * - textures/item/ingot/<id>_ingot.png
-     * - textures/item/nugget/<id>_nugget.png
-     * - textures/item/raw/raw_<id>.png
-     */
-    public static final List<String> METAL_IDS = List.of(
-            "accutyrone", "biklis", "brackstal", "charvin", "clinsor",
-            "conductite", "criminaltalloi", "duracilium", "durathorn", "edgastium",
-            "enduri", "flexarite", "ginspa", "granteron", "liselborn",
-            "lumesor", "sprinal", "stevalite", "tenaloct", "voltarite"
-    );
-
-    // 금속별 아이템 홀더 모음 (필요하면 다른 곳에서 반복 없이 참조 가능)
     public static final Map<String, DeferredHolder<Item, Item>> INGOTS = new LinkedHashMap<>();
     public static final Map<String, DeferredHolder<Item, Item>> NUGGETS = new LinkedHashMap<>();
     public static final Map<String, DeferredHolder<Item, Item>> RAWS = new LinkedHashMap<>();
 
+    // ------------------------------------------------------------
+    // Material BlockItems (stone ore / raw block)
+    // - 블록이 ModBlocks에 등록되어 있으므로 여기서 BlockItem만 등록하면 됨
+    // ------------------------------------------------------------
+    public static final Map<String, DeferredHolder<Item, BlockItem>> STONE_ORE_BLOCK_ITEMS = new LinkedHashMap<>();
+    public static final Map<String, DeferredHolder<Item, BlockItem>> RAW_BLOCK_BLOCK_ITEMS = new LinkedHashMap<>();
+
     static {
         for (String id : METAL_IDS) {
+            // 아이템
             INGOTS.put(id, registerSimple(id + "_ingot"));
             NUGGETS.put(id, registerSimple(id + "_nugget"));
             RAWS.put(id, registerSimple("raw_" + id));
+
+            // 블록 아이템
+            STONE_ORE_BLOCK_ITEMS.put(id, registerBlockItem(id + "_ore", ModBlocks.STONE_ORES.get(id)));
+            RAW_BLOCK_BLOCK_ITEMS.put(id, registerBlockItem("raw_" + id + "_block", ModBlocks.RAW_BLOCKS.get(id)));
         }
     }
 

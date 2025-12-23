@@ -1,6 +1,6 @@
 package com.jangi10.mineblacksmith;
 
-import com.jangi10.mineblacksmith.block.CokeOvenBlock; // ✅ Import 추가
+import com.jangi10.mineblacksmith.block.CokeOvenBlock;
 import com.jangi10.mineblacksmith.block.FurnaceCoreBlock;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -10,6 +10,9 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class ModBlocks {
 
@@ -66,7 +69,6 @@ public class ModBlocks {
                     ResourceLocation.fromNamespaceAndPath(MineBlacksmith.MODID, "coke_oven")
             );
 
-    // ✅ 수정됨: <Block, CokeOvenBlock>으로 타입을 명확히 하고, Import된 클래스 사용
     public static final DeferredHolder<Block, CokeOvenBlock> COKE_OVEN =
             BLOCKS.register(
                     "coke_oven",
@@ -78,6 +80,59 @@ public class ModBlocks {
                                     .setId(COKE_OVEN_KEY)
                     )
             );
+
+    // ============================================================
+    // Stone Ores (stone base) : <metal>_ore
+    // - 요구사항:
+    //   1) 크리에이티브 탭에 보이기 (BlockItem 등록 필요)
+    //   2) 설치/파괴 시 블록 아이템이 반환되기 (loot table: self-drop)
+    //   3) 채굴 레벨: 철곡괭이 이상 (tags: needs_iron_tool + requiresCorrectToolForDrops)
+    // ============================================================
+    public static final Map<String, DeferredHolder<Block, Block>> STONE_ORES = new LinkedHashMap<>();
+
+    // Raw Blocks : raw_<metal>_block (원석 블록)
+    public static final Map<String, DeferredHolder<Block, Block>> RAW_BLOCKS = new LinkedHashMap<>();
+
+    static {
+        for (String id : ModMetalIds.METAL_IDS) {
+
+            // stone ore
+            {
+                String blockId = id + "_ore";
+                ResourceKey<Block> key = ResourceKey.create(
+                        Registries.BLOCK,
+                        ResourceLocation.fromNamespaceAndPath(MineBlacksmith.MODID, blockId)
+                );
+
+                STONE_ORES.put(id, BLOCKS.register(blockId, () ->
+                        new Block(BlockBehaviour.Properties.of()
+                                .mapColor(MapColor.STONE)
+                                .strength(3.0f, 3.0f)
+                                .requiresCorrectToolForDrops()
+                                .setId(key)
+                        )
+                ));
+            }
+
+            // raw block
+            {
+                String blockId = "raw_" + id + "_block";
+                ResourceKey<Block> key = ResourceKey.create(
+                        Registries.BLOCK,
+                        ResourceLocation.fromNamespaceAndPath(MineBlacksmith.MODID, blockId)
+                );
+
+                RAW_BLOCKS.put(id, BLOCKS.register(blockId, () ->
+                        new Block(BlockBehaviour.Properties.of()
+                                .mapColor(MapColor.STONE)
+                                .strength(5.0f, 6.0f)
+                                .requiresCorrectToolForDrops()
+                                .setId(key)
+                        )
+                ));
+            }
+        }
+    }
 
     private ModBlocks() {}
 }

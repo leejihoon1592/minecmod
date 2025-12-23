@@ -13,23 +13,47 @@ public class ModCreativeTabs {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MineBlacksmith.MODID);
 
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MINEBLACKSMITH_TAB =
-            CREATIVE_MODE_TABS.register("mineblacksmith", () ->
+    /**
+     * 1) MineBlacksmith Function
+     *  - 기계/기능 블록/도구/가이드북 등
+     */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MINEBLACKSMITH_FUNCTION_TAB =
+            CREATIVE_MODE_TABS.register("mineblacksmith_function", () ->
                     CreativeModeTab.builder()
-                            // 탭 이름(번역키)
-                            .title(Component.translatable("itemGroup." + MineBlacksmith.MODID + ".mineblacksmith"))
-                            // 탭 아이콘(지금은 furnace_core로)
-                            .icon(() -> new ItemStack(ModItems.FURNACE_CORE_ITEM.get()))
-                            // 탭에 표시될 아이템들
+                            .title(Component.translatable("itemGroup." + MineBlacksmith.MODID + ".mineblacksmith_function"))
+                            .icon(() -> new ItemStack(ModItems.RESEARCH_CODEX.get()))
                             .displayItems((params, output) -> {
+
+                                // 가이드북(항상 1번)
+                                output.accept(ModItems.RESEARCH_CODEX.get());
+
+                                // 기능 블록/아이템
                                 output.accept(ModItems.FURNACE_CORE_ITEM.get());
-                                output.accept(ModItems.COKE.get());
-                                output.accept(ModItems.COKE_BLOCK_ITEM.get());
                                 output.accept(ModItems.COKE_OVEN_ITEM.get());
 
+                                // 연료/재료(기능 탭에도 편의상 노출)
+                                output.accept(ModItems.COKE.get());
+                                output.accept(ModItems.COKE_BLOCK_ITEM.get());
 
-                                // 나중에 아이템/블록 늘어나면 여기 계속 추가
+                            })
+                            .build()
+            );
 
+    /**
+     * 2) MineBlacksmith Material
+     *  - 원석/주괴/조각/재료 계열
+     */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MINEBLACKSMITH_MATERIAL_TAB =
+            CREATIVE_MODE_TABS.register("mineblacksmith_material", () ->
+                    CreativeModeTab.builder()
+                            .title(Component.translatable("itemGroup." + MineBlacksmith.MODID + ".mineblacksmith_material"))
+                            .icon(() -> new ItemStack(ModItems.INGOTS.get("accutyrone").get()))
+                            .displayItems((params, output) -> {
+                                for (String id : ModItems.METAL_IDS) {
+                                    output.accept(ModItems.RAWS.get(id).get());
+                                    output.accept(ModItems.INGOTS.get(id).get());
+                                    output.accept(ModItems.NUGGETS.get(id).get());
+                                }
                             })
                             .build()
             );

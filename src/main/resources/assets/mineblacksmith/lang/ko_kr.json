@@ -1,0 +1,17 @@
+{
+  "itemGroup.mineblacksmith.mineblacksmith": "MineBlacksmith",
+
+  //재료
+  "item.mineblacksmith.coke": "코크스",
+  "item.mineblacksmith.coke_block": "코크스 블록",
+
+  // 블록
+  "block.mineblacksmith.coke_block": "코크스 블록",
+  "block.mineblacksmith.coke_oven": "코크스 오븐",
+
+  //기계
+  "container.mineblacksmith.coke_oven": "코크스 오븐"
+
+
+
+}

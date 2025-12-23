@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "mineblacksmith:block/ore/stone/ginspa_ore"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "mineblacksmith:block/raw_block/raw_duracilium_block"
+  }
+}

@@ -61,7 +61,8 @@ public class FurnaceLogic {
         // 2) 광물 없으면 정제 진행 없음
         if (session.getOreId() == null) return;
 
-        OreData ore = OreRegistry.getOre(session.getOreId()).orElse(null);
+        OreData ore = OreRegistry.get(session.getOreId());
+
         if (ore == null) return;
 
         // 불순물 다 끝났으면 종료
@@ -130,13 +131,15 @@ public class FurnaceLogic {
         }
 
         // 3) 현재 목표 불순물 1개 처리
-        ImpurityData target = ore.getImpurities().get(session.getImpurityIndex());
+        OreData.Impurity target = ore.getImpurities().get(session.getImpurityIndex());
 
         RefiningResult result = RefiningLogic.processTick(
                 session.getTemperature(),
-                target,
+                target.minTemp,
+                target.maxTemp,
                 session.getRefiningProgress()
         );
+
 
         // ==========================================
         // 온도 관리 성공 시 실패 누적 회복(서서히 감소)
@@ -153,7 +156,7 @@ public class FurnaceLogic {
 
         // 4) 완료 시 다음 불순물로 넘어감
         if (result.isFinished()) {
-            session.getExtractedImpurities().add(target.getName());
+            session.getExtractedImpurities().add(target.id);
             session.setImpurityIndex(session.getImpurityIndex() + 1);
             session.setRefiningProgress(0);
         }
@@ -173,7 +176,7 @@ public class FurnaceLogic {
                     session.getMoldState().getDirtLevel(), "광물이 없음");
         }
 
-        OreData ore = OreRegistry.getOre(session.getOreId()).orElse(null);
+        OreData ore = OreRegistry.get(session.getOreId());
         if (ore == null) {
             return new IngotExtractionResult(false, null, 0, 0, 0,
                     session.getMoldState().getDirtLevel(), "등록되지 않은 광물");

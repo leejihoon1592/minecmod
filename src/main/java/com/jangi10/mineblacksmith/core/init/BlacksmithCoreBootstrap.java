@@ -41,6 +41,10 @@ public class BlacksmithCoreBootstrap {
         // 3) 기본 연료 안전망(혹시 fuels 로딩이 비어있을 때)
         ensureDefaultFuelsIfEmpty();
 
+        // 4) 광석(Ore) 로드 (기초 광석 → 재련용 데이터)
+        OreDataLoader.load(configDir);
+
+
         System.out.println("[MineBlacksmith] Core bootstrap complete.");
     }
 
@@ -51,6 +55,7 @@ public class BlacksmithCoreBootstrap {
         registerFuelSafely(ModFuels.CHARCOAL);
         registerFuelSafely(ModFuels.COAL);
         registerFuelSafely(ModFuels.COKE);
+
     }
 
     private static void registerFuelSafely(FuelData data) {

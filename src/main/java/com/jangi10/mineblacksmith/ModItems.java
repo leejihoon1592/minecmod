@@ -8,6 +8,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import com.jangi10.mineblacksmith.item.IncompleteIngotItem;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -77,6 +78,11 @@ public class ModItems {
     // ------------------------------------------------------------
     public static final Map<String, DeferredHolder<Item, BlockItem>> STONE_ORE_BLOCK_ITEMS = new LinkedHashMap<>();
     public static final Map<String, DeferredHolder<Item, BlockItem>> RAW_BLOCK_BLOCK_ITEMS = new LinkedHashMap<>();
+
+    public static final DeferredHolder<Item, Item> INCOMPLETE_INGOT =
+            ITEMS.register("incomplete_ingot",
+                    () -> new IncompleteIngotItem(new Item.Properties().setId(key("incomplete_ingot"))));
+
 
     static {
         for (String id : METAL_IDS) {

@@ -10,7 +10,8 @@ import com.jangi10.mineblacksmith.core.data.ForgingStats;
  *
  * ⚠️ 실제 아이템 내구 감소는 외부(아이템 로직)에서 처리
  */
-public class ArmorDurabilityLogic {
+public class
+ArmorDurabilityLogic {
 
     private static final int BASE_PLATE_WEAR = 1;
     private static final int BASE_CHAIN_WEAR = 1;

@@ -1,9 +1,12 @@
 package com.jangi10.mineblacksmith;
 
+import com.jangi10.mineblacksmith.core.init.BlacksmithCoreBootstrap;
 import com.jangi10.mineblacksmith.core.init.ModFuelBurnTimes;
 import com.jangi10.mineblacksmith.core.init.ModFuels;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 
 @Mod(MineBlacksmith.MODID)
@@ -17,6 +20,14 @@ public class MineBlacksmith {
         // =========================
         ModFuels.registerAll();
         NeoForge.EVENT_BUS.addListener(ModFuelBurnTimes::onFuelBurnTime);
+
+        // =========================
+        // Core bootstrap (config-driven data)
+        // - fuels / ingots / ores
+        // =========================
+        modBus.addListener((FMLCommonSetupEvent evt) -> evt.enqueueWork(() ->
+                BlacksmithCoreBootstrap.bootstrap(FMLPaths.CONFIGDIR.get().toFile())
+        ));
 
         // =========================
         // Mod registries (반드시 "한 번만")

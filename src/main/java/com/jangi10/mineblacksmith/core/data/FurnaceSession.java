@@ -88,7 +88,56 @@ public class FurnaceSession {
     public void setBurnTicks(int v) { this.burnTicks = Math.max(0, v); }
 
     public int getBurnTicksTotal() { return burnTicksTotal; }
-    public void setBurnTicksTotal(int v) { this.burnTicksTotal = Math.max(0, v); }
+    public void setBurnTicksTotal(int v) { this.burnTicksTotal = Math.max(0, v);}
+    // ==============================
+    // [주조/용탕] 조각 단위 저장
+    // - 문서 기준: 9조각 = 완전 주괴
+    // ==============================
+    private String meltIngotId;   // 예: "mineblacksmith:iron_ingot"
+    private int meltFragments;    // 용탕 조각 수(0~)
+
+    public String getMeltIngotId() { return meltIngotId; }
+    public void setMeltIngotId(String meltIngotId) { this.meltIngotId = meltIngotId; }
+
+    public int getMeltFragments() { return meltFragments; }
+    public void setMeltFragments(int meltFragments) { this.meltFragments = Math.max(0, meltFragments); }
+
+    /**
+     * 용탕 조각 추가(같은 금속만 누적 허용)
+     * @return 성공 여부
+     */
+    public boolean addMelt(String ingotId, int fragments) {
+        if (fragments <= 0) return false;
+        if (ingotId == null || ingotId.isBlank()) return false;
+
+        if (meltIngotId == null || meltIngotId.isBlank()) {
+            meltIngotId = ingotId;
+        } else if (!meltIngotId.equals(ingotId)) {
+            // 다른 금속 섞임은 합금 단계에서 처리.
+            // 지금 뼈대 단계에서는 누적 불가.
+            return false;
+        }
+
+        meltFragments += fragments;
+        return true;
+    }
+
+    /** 용탕 1조각 배출(성공 시 true) */
+    public boolean drainOneFragment() {
+        if (meltFragments <= 0) return false;
+        meltFragments -= 1;
+        if (meltFragments == 0) {
+            meltIngotId = null;
+        }
+        return true;
+    }
+
+    /** 용탕 전부 비우기 */
+    public void clearMelt() {
+        meltIngotId = null;
+        meltFragments = 0;
+    }
+
 
 
 

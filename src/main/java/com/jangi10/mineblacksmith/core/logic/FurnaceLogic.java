@@ -66,7 +66,33 @@ public class FurnaceLogic {
         if (ore == null) return;
 
         // 불순물 다 끝났으면 종료
-        if (session.getImpurityIndex() >= ore.getImpurities().size()) return;
+        // 불순물 다 끝났으면: [주조 뼈대] 용탕(조각) 생성 후 종료
+        if (session.getImpurityIndex() >= ore.getImpurities().size()) {
+
+            // ==============================
+            // [주조 뼈대] 정제 완료 → 용탕(9조각) 생성
+            // - 지금은 단순화: ore 1개 = 결과 주괴 9조각
+            // - “저융점 먼저/다성분 분리”는 다음 단계에서 확장
+            // ==============================
+
+            String resultIngotId = ore.getResultIngotId();
+
+            // 같은 금속만 누적 허용 (합금은 다음 단계)
+            boolean ok = session.addMelt(resultIngotId, 9);
+
+            if (ok) {
+                // ✅ 정제 상태 리셋(다음 ore 투입을 위해)
+                // (oreId 자체는 "블록엔티티 슬롯 소모" 타이밍과 연결해야 하므로
+                //  여기서는 건드리지 않는다)
+                session.setImpurityIndex(0);
+                session.setRefiningProgress(0);
+                session.getExtractedImpurities().clear();
+                session.resetForgeWindowFailCount();
+            }
+
+            return;
+        }
+
 
         // ==========================================
         // 온도 색상 기반 "가공 가능" 체크
@@ -261,6 +287,7 @@ public class FurnaceLogic {
                 msg
         );
     }
+
 
     private static int randRange(int min, int max) {
         return min + RNG.nextInt((max - min) + 1);

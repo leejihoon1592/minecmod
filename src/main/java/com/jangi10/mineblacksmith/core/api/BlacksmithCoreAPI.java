@@ -301,8 +301,18 @@ public class BlacksmithCoreAPI {
     }
 
     public static RefiningResult processRefining(double currentTemp, ImpurityData impurity, int currentProgress) {
-        return RefiningLogic.processTick(currentTemp, impurity, currentProgress);
+        if (impurity == null) {
+            // impurity가 없으면 진행 안 함(원하면 여기 정책 바꿔도 됨)
+            return RefiningLogic.processTick(currentTemp, 0, 0, currentProgress);
+        }
+
+        // RefiningLogic이 int를 받으니, 현재 데이터(double)를 안전하게 캐스팅
+        int minTemp = (int) Math.round(impurity.getRemovalTempMin());
+        int maxTemp = (int) Math.round(impurity.getRemovalTempMax());
+
+        return RefiningLogic.processTick(currentTemp, minTemp, maxTemp, currentProgress);
     }
+
 
     // --- 리듬 ---
     public static float getRhythmCursorPosition(long gameTimeMs, int difficulty) {

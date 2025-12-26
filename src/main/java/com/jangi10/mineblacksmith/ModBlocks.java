@@ -2,6 +2,7 @@ package com.jangi10.mineblacksmith;
 
 import com.jangi10.mineblacksmith.block.CokeOvenBlock;
 import com.jangi10.mineblacksmith.block.FurnaceCoreBlock;
+import com.jangi10.mineblacksmith.block.FurnaceOutputPipeBlock;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -19,6 +20,26 @@ public class ModBlocks {
     // ✅ 블록 레지스트리
     public static final DeferredRegister.Blocks BLOCKS =
             DeferredRegister.createBlocks(MineBlacksmith.MODID);
+
+    // =========================
+    // 0. Furnace Output Pipe (출력 파이프)
+    // =========================
+    private static final ResourceKey<Block> FURNACE_OUTPUT_PIPE_KEY =
+            ResourceKey.create(
+                    Registries.BLOCK,
+                    ResourceLocation.fromNamespaceAndPath(MineBlacksmith.MODID, "furnace_output_pipe")
+            );
+
+    public static final DeferredHolder<Block, FurnaceOutputPipeBlock> FURNACE_OUTPUT_PIPE =
+            BLOCKS.register(
+                    "furnace_output_pipe",
+                    () -> new FurnaceOutputPipeBlock(
+                            BlockBehaviour.Properties.of()
+                                    .mapColor(MapColor.METAL)
+                                    .strength(2.0f)
+                                    .setId(FURNACE_OUTPUT_PIPE_KEY)
+                    )
+            );
 
     // =========================
     // 1. Furnace Core (화로 코어)
@@ -83,10 +104,6 @@ public class ModBlocks {
 
     // ============================================================
     // Stone Ores (stone base) : <metal>_ore
-    // - 요구사항:
-    //   1) 크리에이티브 탭에 보이기 (BlockItem 등록 필요)
-    //   2) 설치/파괴 시 블록 아이템이 반환되기 (loot table: self-drop)
-    //   3) 채굴 레벨: 철곡괭이 이상 (tags: needs_iron_tool + requiresCorrectToolForDrops)
     // ============================================================
     public static final Map<String, DeferredHolder<Block, Block>> STONE_ORES = new LinkedHashMap<>();
 

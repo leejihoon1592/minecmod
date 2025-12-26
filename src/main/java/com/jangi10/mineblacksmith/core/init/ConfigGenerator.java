@@ -48,6 +48,102 @@ public class ConfigGenerator {
         }
     }
 
+    /**
+     * 기초 금속(모드 전용) 기본 주괴 JSON들을 생성한다.
+     * - 이미 파일이 존재하면 건드리지 않는다.
+     */
+    public static void createDefaultBaseMetalIngotConfigs(String directoryPath) {
+        File dir = new File(directoryPath);
+        if (!dir.exists()) dir.mkdirs();
+
+        for (DefaultMetalData.Metal m : DefaultMetalData.BASE_METALS) {
+            String prefix = m.idPrefix();
+            File file = new File(dir, prefix + "_ingot.json");
+            if (file.exists()) continue;
+
+            try (FileWriter writer = new FileWriter(file)) {
+                // 엑셀 수식본 기반: weight는 기존 calculateWeight로 계산(게임 내 수식과 일치)
+                double hardness = m.strength();
+                double durability = m.durability();
+                double elasticity = m.elasticity();
+                double polishing = m.polishing();
+                double conductivity = m.conductivity();
+
+                double calculatedWeight = calculateWeight(
+                        hardness, durability, elasticity, polishing, conductivity
+                );
+
+                ForgingStats stats = new ForgingStats(
+                        hardness,
+                        durability,
+                        elasticity,
+                        polishing,
+                        conductivity,
+                        calculatedWeight
+                );
+
+                // id는 Furnace/Ore/Alloy 시스템의 "키"로도 사용됨
+                String ingotKey = "mineblacksmith:" + prefix + "_ingot";
+                String displayName = m.koName();
+
+                double melting = m.meltingPoint();
+                // 끓는점은 기획서에서 확정되기 전까지 안전한 임시값(녹는점 + 1200)
+                double boiling = melting + 1200.0;
+
+                IngotData data = new IngotData(
+                        ingotKey,
+                        displayName,
+                        stats,
+                        melting,
+                        boiling,
+                        Math.max(1, m.difficulty()),
+                        m.baseColor()
+                );
+
+                GSON.toJson(data, writer);
+                System.out.println("[ConfigGenerator] 기본 주괴 생성: " + file.getName());
+            } catch (Exception e) {
+                System.err.println("[ConfigGenerator] 기본 주괴 생성 실패: " + file.getName());
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 기초 광석(블록 아이템) -> 결과 주괴 매핑 config를 생성한다.
+     * - config/mineblacksmith/ores/*.json
+     */
+    public static void createDefaultOreConfigs(File configDir) {
+        if (configDir == null) configDir = new File("config");
+        File root = new File(configDir, "mineblacksmith/ores");
+        if (!root.exists()) root.mkdirs();
+
+        for (DefaultMetalData.Metal m : DefaultMetalData.BASE_METALS) {
+            String prefix = m.idPrefix();
+            File file = new File(root, prefix + "_ore.json");
+            if (file.exists()) continue;
+
+            try (FileWriter writer = new FileWriter(file)) {
+                // OreDataLoader가 읽는 형태와 동일한 JSON
+                // - oreItemId: 블록 아이템(설치 가능한 ore block item)
+                // - resultIngotId: FurnaceLogic 결과로 사용하는 IngotData key
+                String oreItemId = "mineblacksmith:" + prefix + "_ore";
+                String resultIngotId = "mineblacksmith:" + prefix + "_ingot";
+
+                String json = "{\n" +
+                        "  \"oreItemId\": \"" + oreItemId + "\",\n" +
+                        "  \"resultIngotId\": \"" + resultIngotId + "\",\n" +
+                        "  \"impurities\": []\n" +
+                        "}\n";
+                writer.write(json);
+                System.out.println("[ConfigGenerator] 기본 광석 매핑 생성: " + file.getName());
+            } catch (Exception e) {
+                System.err.println("[ConfigGenerator] 기본 광석 매핑 생성 실패: " + file.getName());
+                e.printStackTrace();
+            }
+        }
+    }
+
     public static void createDefaultFuelConfigs(File fuelsDir) {
         if (!fuelsDir.exists()) fuelsDir.mkdirs();
 
@@ -69,27 +165,43 @@ public class ConfigGenerator {
         }
     }
 
+    /**
+     * "합금 시뮬레이션 주괴온도 수식 만들기.xlsx" 의 무게 수식과 동일한 형태.
+     * (기초 금속/합금 공통으로 쓰기 위해 여기에 둔다)
+     */
     private static double calculateWeight(double hardness, double durability, double elasticity,
                                           double polishing, double conductivity) {
 
-        double val1 = (durability + hardness + elasticity) - 0.5 * (polishing + conductivity);
+        // M: (내구+강도+탄성) - 0.5*(연마+전도)
+        double m = (durability + hardness + elasticity) - 0.5 * (polishing + conductivity);
 
-        double sumStats = durability + hardness + elasticity + polishing + conductivity;
-        double val2 = 0;
-        double val3 = 0;
+        // N: IF((내구+강도+탄성)<=10,2, IF>=20,-4, IF>=15,-2, 0)
+        double sumA = durability + hardness + elasticity;
+        double n;
+        if (sumA <= 10) n = 2;
+        else if (sumA >= 20) n = -4;
+        else if (sumA >= 15) n = -2;
+        else n = 0;
 
-        double val4 = val1 + val2 + val3;
+        // O: IF((연마+전도)<=10,2, IF>=15,-2, 0)
+        double sumB = polishing + conductivity;
+        double o;
+        if (sumB <= 10) o = 2;
+        else if (sumB >= 15) o = -2;
+        else o = 0;
 
-        double val5 = 0;
-        if (val4 >= 1 && val4 <= 6) {
-            val5 = 4;
-        } else if (val4 >= 7 && val4 <= 10) {
-            val5 = 2;
-        } else if (val4 >= 13 && val4 <= 15) {
-            val5 = -2;
-        }
+        // P: M + N + O
+        double p = m + n + o;
 
-        double baseWeight = Math.max(1, val4 + val5);
+        // Q: IF(AND(P>=1,P<=6),4, IF(7-10,2, IF(13-15,-2, IF(P>=16,-4,0))))
+        double q;
+        if (p >= 1 && p <= 6) q = 4;
+        else if (p >= 7 && p <= 10) q = 2;
+        else if (p >= 13 && p <= 15) q = -2;
+        else if (p >= 16) q = -4;
+        else q = 0;
+
+        double baseWeight = Math.max(1, p + q);
         return Math.ceil(baseWeight) * 0.1;
     }
 

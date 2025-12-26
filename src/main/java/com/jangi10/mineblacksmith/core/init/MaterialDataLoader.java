@@ -20,6 +20,7 @@ public class MaterialDataLoader {
 
         // 기본 파일 생성
         ConfigGenerator.createDefaultIngotConfigs(DIR_PATH);
+        ConfigGenerator.createDefaultBaseMetalIngotConfigs(DIR_PATH);
 
         File[] files = directory.listFiles((dir, name) -> name.endsWith(".json"));
         if (files == null || files.length == 0) {

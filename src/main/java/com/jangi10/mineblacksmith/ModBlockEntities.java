@@ -1,7 +1,8 @@
 package com.jangi10.mineblacksmith;
 
-import com.jangi10.mineblacksmith.blockentity.FurnaceCoreBlockEntity;
 import com.jangi10.mineblacksmith.blockentity.CokeOvenBlockEntity;
+import com.jangi10.mineblacksmith.blockentity.FurnaceCoreBlockEntity;
+import com.jangi10.mineblacksmith.blockentity.FurnaceOutputPipeBlockEntity;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -26,6 +27,13 @@ public class ModBlockEntities {
                     () -> new BlockEntityType<>(
                             CokeOvenBlockEntity::new,
                             Set.of(ModBlocks.COKE_OVEN.get())
+                    ));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FurnaceOutputPipeBlockEntity>> FURNACE_OUTPUT_PIPE_BE =
+            BLOCK_ENTITY_TYPES.register("furnace_output_pipe",
+                    () -> new BlockEntityType<>(
+                            FurnaceOutputPipeBlockEntity::new,
+                            Set.of(ModBlocks.FURNACE_OUTPUT_PIPE.get())
                     ));
 
     private ModBlockEntities() {}
